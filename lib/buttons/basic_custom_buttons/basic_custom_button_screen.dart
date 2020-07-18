@@ -1,4 +1,4 @@
-import 'package:buttons/screens/basic_custom_button_screen/custom_button.dart';
+import 'package:buttons/buttons/basic_custom_buttons/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class BasicCustomButtonScreen extends StatelessWidget {
