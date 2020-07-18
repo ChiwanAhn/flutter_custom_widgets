@@ -20,102 +20,126 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class LayoutScreen extends StatelessWidget {
+class LayoutScreen extends StatefulWidget {
   const LayoutScreen({Key key}) : super(key: key);
 
   @override
+  _LayoutScreenState createState() => _LayoutScreenState();
+}
+
+class _LayoutScreenState extends State<LayoutScreen> {
+  PageController _controller;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    _controller = PageController();
+    _controller.addListener(() {
+      // FIXME: 다음으로 이동할때 page가 x.5 보다 클때만 _currentIndex를 업데이트
+      // 이전으로 이동할때 page가 x.5 보다 작을때만 _currentIndex를 업데이트
+      setState(() {
+        _currentIndex = _controller.page.toInt();
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final int _length = 5;
     return Scaffold(
       appBar: AppBar(
-        title: Text('한자 연습'),
-        centerTitle: false,
+        title: Text('화면전환'),
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Container(
-            color: Colors.blue.withOpacity(0.4),
-            height: 100,
-            child: Text('description'),
-          ),
-          Container(
-            color: Colors.green.withOpacity(0.4),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-            child: Center(
-              child: Text(
-                'also',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 40,
-                ),
+          Expanded(
+            child: Container(
+              color: Colors.red.withOpacity(0.3),
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  PageView.builder(
+                    controller: _controller,
+                    itemCount: _length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        child: Center(
+                          child: Text(
+                            '${index + 1} 번째 화면',
+                            style: Get.textTheme.headline3,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SafeArea(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 8),
+                        child: Text(
+                          '${_currentIndex + 1} / $_length',
+                          style: TextStyle(
+                            color: Colors.black38,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          _buildScrollable(),
-          _buildButtons(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 80),
+            child: SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  OutlineButton(
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            _controller.animateToPage(
+                              _currentIndex - 1,
+                              duration: Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        : null,
+                    child: Text('이전으로'),
+                  ),
+                  OutlineButton(
+                    onPressed: _currentIndex < _length - 1
+                        ? () {
+                            _controller.animateToPage(
+                              _currentIndex + 1,
+                              duration: Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        : null,
+                    child: Text('다음으로'),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildScrollable() {
-    return Expanded(
-      child: Container(
-        color: Colors.yellow.withOpacity(0.4),
-        padding: const EdgeInsets.all(24),
-        child: Scrollbar(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 80),
-            physics: AlwaysScrollableScrollPhysics(),
-            child: Text(
-              'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-              style: TextStyle(
-                fontSize: 24,
-                height: 1.7,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButtons() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                ...List.generate(
-                  4,
-                  (index) => RaisedButton(
-                    onPressed: () {},
-                    child: Text('순서없이'),
-                  ),
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                ...List.generate(
-                  4,
-                  (index) => RaisedButton(
-                    onPressed: () {},
-                    child: Text('순서없이'),
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 
